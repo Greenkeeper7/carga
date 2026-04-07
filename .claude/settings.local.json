@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\\\Users\\\\green\\\\carga\")",
+      "Bash(npm create:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npx vite:*)",
+      "Bash(node node_modules/vite/bin/vite.js build)",
+      "Bash(curl:*)",
+      "Bash(python3 -c \"import sys,json; spec=json.load\\(sys.stdin\\); tbl=spec['definitions'].get\\('Cargadores',{}\\); print\\(json.dumps\\(list\\(tbl.get\\('properties',{}\\).keys\\(\\)\\), indent=2\\)\\)\")",
+      "Bash(node -e \"let d=''; process.stdin.on\\('data',c=>d+=c\\); process.stdin.on\\('end',\\(\\)=>{ const s=JSON.parse\\(d\\); const props=s.definitions?.Cargadores?.properties; console.log\\(Object.keys\\(props||{}\\).join\\('\\\\n'\\)\\); }\\)\")"
+    ]
+  }
+}
