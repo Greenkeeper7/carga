@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 
 const BASE_URL = 'https://bhfjondoxtbxtuccfbth.supabase.co/rest/v1/Cargadores'
-const API_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+const API_KEY = import.meta.env.VITE_SUPABASE_SERVICE_KEY
 
 const HEADERS = {
   apikey: API_KEY,
