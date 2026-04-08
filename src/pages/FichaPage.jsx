@@ -231,7 +231,7 @@ export default function FichaPage() {
       </div>
 
       {/* Contenido scrollable */}
-      <div className="flex-1 overflow-y-auto no-scrollbar bg-gray-50">
+      <div className="flex-1 overflow-y-auto no-scrollbar bg-gray-50 pb-40">
         {/* Tarjeta principal */}
         <div className="bg-white mx-0 -mt-4 rounded-t-3xl px-5 pt-6 pb-4">
           <div className="flex items-start justify-between gap-2">
@@ -317,24 +317,32 @@ export default function FichaPage() {
           </button>
         </div>
 
-        {/* Espacio para que el contenido no quede bajo el botón fijo */}
-        <div className="h-24" />
-      </div>
-
-      {/* Botón fijo en la parte inferior, dentro del contenedor relativo de la app */}
-      <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-3 bg-white border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
+        {/* Tarjeta guardada — dentro del scroll, visible antes del botón fijo */}
         {user && hasPaymentMethod && (
-          <div className="flex items-center gap-2 justify-center mb-2">
+          <div className="flex items-center gap-2 justify-center pb-2">
             <CreditCard size={13} className="text-gray-400" />
             <p className="text-xs text-gray-400">
               {user.user_metadata?.card_brand?.toUpperCase()} ···· {user.user_metadata?.card_last4}
             </p>
           </div>
         )}
+      </div>
+
+      {/* Botón Iniciar carga — fixed, siempre visible sobre la nav bar */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 80,
+          left: 0,
+          right: 0,
+          padding: '0 16px',
+          zIndex: 999,
+        }}
+      >
         <button
           onClick={puedeCarga ? handleIniciarCarga : undefined}
           disabled={!puedeCarga}
-          className={`w-full py-4 rounded-2xl text-white font-bold text-base shadow-lg transition-all ${
+          className={`w-full py-4 rounded-2xl text-white font-bold text-base shadow-xl transition-all ${
             puedeCarga
               ? 'bg-verde active:scale-95 shadow-verde/30'
               : 'bg-gray-300 cursor-not-allowed'
