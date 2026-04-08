@@ -86,6 +86,7 @@ export default function SesionPage() {
 
   // Datos del cargador pasados desde FichaPage
   const cargadorNav = location.state?.cargador
+  const sesionValida = !!cargadorNav
   const CARGADOR_ACTIVO = cargadorNav
     ? {
         nombre: cargadorNav.nombre,
@@ -180,6 +181,27 @@ export default function SesionPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kwhCargados])
+
+  // Pantalla de estado vacío: acceso directo sin sesión activa
+  if (!sesionValida) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center px-8 text-center bg-gray-50">
+        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-5">
+          <Zap size={36} className="text-gray-300" />
+        </div>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">Sin sesión activa</h2>
+        <p className="text-sm text-gray-500 mb-8">
+          No tienes ninguna sesión de carga en curso. Busca un cargador cercano para empezar.
+        </p>
+        <button
+          onClick={() => navigate('/mapa')}
+          className="w-full bg-azul text-white font-bold py-4 rounded-2xl shadow-lg shadow-azul/30 active:scale-95 transition-transform"
+        >
+          Buscar cargador
+        </button>
+      </div>
+    )
+  }
 
   if (!activa && !cargaCompleta) {
     // Pantalla de carga mientras procesa el cobro
@@ -333,7 +355,7 @@ export default function SesionPage() {
           <StatCard
             icon={Zap}
             label="Tarifa"
-            value={`${CARGADOR_ACTIVO.precio.toFixed(2)} €/kWh`}
+            value={`${Number(CARGADOR_ACTIVO.precio ?? 0).toFixed(2)} €/kWh`}
             color="#185FA5"
           />
         </div>
