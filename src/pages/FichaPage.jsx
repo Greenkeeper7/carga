@@ -299,7 +299,7 @@ export default function FichaPage() {
         </div>
 
         {/* Cómo llegar */}
-        <div className="px-4 pb-3">
+        <div className="px-4 pb-4">
           <button
             onClick={handleComoLlegar}
             className="w-full flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
@@ -317,11 +317,12 @@ export default function FichaPage() {
           </button>
         </div>
 
+        {/* Espacio para que el contenido no quede bajo el botón fijo */}
+        <div className="h-24" />
       </div>
 
-      {/* Botón de carga fijo — anclado sobre la BottomNav */}
-      <div className="flex-shrink-0 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-100">
-        {/* Info de tarjeta si ya está guardada */}
+      {/* Botón fijo en la parte inferior, dentro del contenedor relativo de la app */}
+      <div className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-3 bg-white border-t border-gray-100 shadow-[0_-4px_12px_rgba(0,0,0,0.06)]">
         {user && hasPaymentMethod && (
           <div className="flex items-center gap-2 justify-center mb-2">
             <CreditCard size={13} className="text-gray-400" />
@@ -330,7 +331,6 @@ export default function FichaPage() {
             </p>
           </div>
         )}
-
         <button
           onClick={puedeCarga ? handleIniciarCarga : undefined}
           disabled={!puedeCarga}
