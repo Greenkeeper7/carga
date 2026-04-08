@@ -112,8 +112,11 @@ export default function FichaPage() {
     const lat = cargador.lat
     const lng = cargador.lng
     if (!lat || !lng) return
-    // En móvil abre la app nativa de Maps; en escritorio abre maps.google.com
-    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank')
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+    const url = isIOS
+      ? `maps://maps.google.com/maps?daddr=${lat},${lng}`
+      : `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`
+    window.open(url, '_blank')
   }
 
   // Guard: comprueba auth y tarjeta antes de iniciar la sesión
@@ -314,12 +317,10 @@ export default function FichaPage() {
           </button>
         </div>
 
-        {/* Spacer para el botón fijo */}
-        <div className="h-24" />
       </div>
 
-      {/* Botón de carga fijo */}
-      <div className="absolute bottom-16 left-0 right-0 px-4 pb-2 bg-gradient-to-t from-gray-50 pt-4">
+      {/* Botón de carga fijo — anclado sobre la BottomNav */}
+      <div className="flex-shrink-0 px-4 pt-3 pb-4 bg-gray-50 border-t border-gray-100">
         {/* Info de tarjeta si ya está guardada */}
         {user && hasPaymentMethod && (
           <div className="flex items-center gap-2 justify-center mb-2">
