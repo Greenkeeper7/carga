@@ -221,14 +221,19 @@ export default function FichaPage() {
         {/* Stats grid */}
         <div className="grid grid-cols-3 gap-3 px-4 py-3">
           {[
-            { label: 'Precio', value: cargador.precio != null ? `${Number(cargador.precio).toFixed(2)} €` : '—', sub: 'por kWh' },
+            {
+              label: 'Precio',
+              value: cargador.precio != null ? `${Number(cargador.precio).toFixed(2)} €` : '—',
+              sub: cargador.precio != null && cargador.precioEstimado ? 'precio estimado' : 'por kWh',
+              subMuted: cargador.precioEstimado,
+            },
             { label: 'Potencia máx.', value: `${cargador.potencia} kW`, sub: 'disponible' },
             { label: 'Conectores', value: `${cargador.conectores.length}`, sub: 'tipos' },
           ].map(stat => (
             <div key={stat.label} className="bg-white rounded-2xl p-3 text-center shadow-sm border border-gray-100">
               <p className="text-lg font-bold text-gray-900">{stat.value}</p>
               <p className="text-[10px] text-gray-500 mt-0.5">{stat.label}</p>
-              <p className="text-[9px] text-gray-400">{stat.sub}</p>
+              <p className={`text-[9px] ${stat.subMuted ? 'text-gray-400 italic' : 'text-gray-400'}`}>{stat.sub}</p>
             </div>
           ))}
         </div>

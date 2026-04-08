@@ -31,6 +31,27 @@ function normalizeConnector(title, typeId) {
   return t.split('(')[0].trim() || 'Conector'
 }
 
+// Precio estimado según operador (OCM no provee precios estructurados)
+const PRECIOS_RED = [
+  { clave: 'zunder',   precio: 0.25 },
+  { clave: 'iberdrola', precio: 0.29 },
+  { clave: 'repsol',   precio: 0.31 },
+  { clave: 'endesa',   precio: 0.27 },
+  { clave: 'wenea',    precio: 0.26 },
+  { clave: 'ionity',   precio: 0.35 },
+  { clave: 'enel',     precio: 0.28 },
+  { clave: 'cepsa',    precio: 0.30 },
+  { clave: 'bp',       precio: 0.32 },
+]
+const PRECIO_DEFECTO = 0.29
+
+function precioEstimado(operador) {
+  if (!operador) return PRECIO_DEFECTO
+  const lower = operador.toLowerCase()
+  const match = PRECIOS_RED.find(r => lower.includes(r.clave))
+  return match ? match.precio : PRECIO_DEFECTO
+}
+
 // Convierte un POI de OCM al formato interno de la app
 export function mapOCMPoi(poi) {
   const info = poi.AddressInfo ?? {}
@@ -69,7 +90,8 @@ export function mapOCMPoi(poi) {
     disponibles: Math.min(disponibles, total),
     total,
     potencia,
-    precio: null, // OCM no provee precios estructurados
+    precio: precioEstimado(poi.OperatorInfo?.Title),
+    precioEstimado: true,
     horario: info.AccessComments ?? null,
     conectores,
     valoracion: null,
