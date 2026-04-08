@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -9,8 +10,12 @@ import {
   Navigation,
   Share2,
   Heart,
+  CreditCard,
 } from 'lucide-react'
 import { useCargador } from '../hooks/useCargadores'
+import { useAuth } from '../contexts/AuthContext'
+import AuthModal from '../components/AuthModal'
+import StripeCardForm from '../components/StripeCardForm'
 
 const CONECTOR_COLORES = {
   CCS2: '#185FA5',
@@ -61,15 +66,38 @@ export default function FichaPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, hasPaymentMethod } = useAuth()
 
-  // Si venimos desde MapaPage el cargador llega en el estado de navegación.
-  // Solo consultamos Supabase cuando no hay datos en el estado (p.ej. acceso directo por URL).
+  const [pendiente, setPendiente] = useState(null) // null | 'auth' | 'card'
+
   const cargadorDesdeEstado = location.state?.cargador ?? null
   const skipFetch = cargadorDesdeEstado !== null
 
   const { cargador: cargadorSupabase, loading, error } = useCargador(skipFetch ? null : id)
-
   const cargador = cargadorDesdeEstado ?? cargadorSupabase
+
+  // Guard: comprueba auth y tarjeta antes de iniciar la sesión
+  const handleIniciarCarga = () => {
+    if (!user) { setPendiente('auth'); return }
+    if (!hasPaymentMethod) { setPendiente('card'); return }
+    navigate('/sesion', { state: { cargador } })
+  }
+
+  // Callback tras login exitoso
+  const handleAuthSuccess = freshUser => {
+    setPendiente(null)
+    if (!freshUser?.user_metadata?.stripe_pm_id) {
+      setPendiente('card')
+    } else {
+      navigate('/sesion', { state: { cargador } })
+    }
+  }
+
+  // Callback tras guardar tarjeta
+  const handleCardSuccess = () => {
+    setPendiente(null)
+    navigate('/sesion', { state: { cargador } })
+  }
 
   if (loading && !skipFetch) {
     return (
@@ -237,8 +265,18 @@ export default function FichaPage() {
 
       {/* Botón de carga fijo */}
       <div className="absolute bottom-16 left-0 right-0 px-4 pb-2 bg-gradient-to-t from-gray-50 pt-4">
+        {/* Info de tarjeta si ya está guardada */}
+        {user && hasPaymentMethod && (
+          <div className="flex items-center gap-2 justify-center mb-2">
+            <CreditCard size={13} className="text-gray-400" />
+            <p className="text-xs text-gray-400">
+              {user.user_metadata?.card_brand?.toUpperCase()} ···· {user.user_metadata?.card_last4}
+            </p>
+          </div>
+        )}
+
         <button
-          onClick={() => puedeCarga && navigate('/sesion')}
+          onClick={puedeCarga ? handleIniciarCarga : undefined}
           disabled={!puedeCarga}
           className={`w-full py-4 rounded-2xl text-white font-bold text-base shadow-lg transition-all ${
             puedeCarga
@@ -249,13 +287,29 @@ export default function FichaPage() {
           {puedeCarga ? (
             <span className="flex items-center justify-center gap-2">
               <Zap size={20} fill="white" />
-              Iniciar carga
+              {!user ? 'Inicia sesión para cargar' : !hasPaymentMethod ? 'Añadir tarjeta y cargar' : 'Iniciar carga'}
             </span>
           ) : (
             'No hay conectores disponibles'
           )}
         </button>
       </div>
+
+      {/* Modal de autenticación */}
+      {pendiente === 'auth' && (
+        <AuthModal
+          onSuccess={handleAuthSuccess}
+          onClose={() => setPendiente(null)}
+        />
+      )}
+
+      {/* Modal de tarjeta Stripe */}
+      {pendiente === 'card' && (
+        <StripeCardForm
+          onSuccess={handleCardSuccess}
+          onClose={() => setPendiente(null)}
+        />
+      )}
     </div>
   )
 }

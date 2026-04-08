@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Zap, MapPin, Clock, Euro, X, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { Zap, MapPin, Clock, Euro, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
-const CARGADOR_ACTIVO = {
-  nombre: 'Iberdrola Plaza Cataluña',
-  direccion: 'Pl. de Catalunya, 1, Barcelona',
-  conector: 'CCS2 50 kW',
-  precio: 0.38,
+const CARGADOR_FALLBACK = {
+  nombre: 'Punto de carga',
+  direccion: '',
+  conector: '—',
+  precio: null,
   potenciaMax: 50,
 }
 
@@ -78,12 +80,31 @@ function StatCard({ icon: Icon, label, value, color = '#185FA5' }) {
 
 export default function SesionPage() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { user } = useAuth()
+
+  // Datos del cargador pasados desde FichaPage
+  const cargadorNav = location.state?.cargador
+  const CARGADOR_ACTIVO = cargadorNav
+    ? {
+        nombre: cargadorNav.nombre,
+        direccion: cargadorNav.direccion,
+        conector: cargadorNav.conectores?.[0]
+          ? `${cargadorNav.conectores[0].tipo} ${cargadorNav.conectores[0].kw ? cargadorNav.conectores[0].kw + ' kW' : ''}`
+          : '—',
+        precio: cargadorNav.precio ?? 0.31,
+        potenciaMax: cargadorNav.potencia ?? 50,
+      }
+    : CARGADOR_FALLBACK
+
   const [bateria, setBateria] = useState(BATERIA_INICIO)
   const [segundos, setSegundos] = useState(0)
   const [activa, setActiva] = useState(true)
   const [mostrarStop, setMostrarStop] = useState(false)
   const [kwhCargados, setKwhCargados] = useState(0)
   const [potenciaActual, setPotenciaActual] = useState(48)
+  const [cobrando, setCobrando] = useState(false)
+  const [resultadoCobro, setResultadoCobro] = useState(null) // { ok, amount_eur, error }
 
   // Simulación de carga
   useEffect(() => {
@@ -120,33 +141,131 @@ export default function SesionPage() {
   const coste = (kwhCargados * CARGADOR_ACTIVO.precio).toFixed(2)
   const cargaCompleta = bateria >= BATERIA_FIN
 
-  const detenerCarga = useCallback(() => {
+  const detenerCarga = useCallback(async () => {
     setActiva(false)
     setMostrarStop(false)
-  }, [])
+    setCobrando(true)
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const pmId = session?.user?.user_metadata?.stripe_pm_id
+      const importeEur = parseFloat((kwhCargados * CARGADOR_ACTIVO.precio).toFixed(2))
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-charge`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({
+            payment_method_id: pmId,
+            amount_eur: importeEur,
+            description: `Carga en ${CARGADOR_ACTIVO.nombre} — ${kwhCargados.toFixed(2)} kWh`,
+          }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error al procesar el pago')
+      setResultadoCobro({ ok: true, amount_eur: importeEur })
+    } catch (e) {
+      setResultadoCobro({ ok: false, error: e.message })
+    } finally {
+      setCobrando(false)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [kwhCargados])
 
   if (!activa && !cargaCompleta) {
+    // Pantalla de carga mientras procesa el cobro
+    if (cobrando) {
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center bg-gray-50">
+          <div className="w-16 h-16 border-4 border-azul border-t-transparent rounded-full animate-spin mb-6" />
+          <h2 className="text-lg font-bold text-gray-900 mb-1">Procesando pago</h2>
+          <p className="text-sm text-gray-500">
+            Cobrando {coste} € a tu tarjeta guardada…
+          </p>
+        </div>
+      )
+    }
+
+    // Pantalla de resultado del cobro
+    if (resultadoCobro) {
+      const ok = resultadoCobro.ok
+      return (
+        <div className="h-full flex flex-col items-center justify-center px-6 text-center bg-gray-50">
+          <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${ok ? 'bg-verde/10' : 'bg-red-50'}`}>
+            {ok
+              ? <CheckCircle size={40} className="text-verde" />
+              : <XCircle size={40} className="text-rojo" />
+            }
+          </div>
+
+          <h2 className="text-xl font-bold text-gray-900 mb-1">
+            {ok ? 'Pago realizado' : 'Error en el pago'}
+          </h2>
+
+          {ok ? (
+            <>
+              <p className="text-3xl font-bold text-gray-900 mb-1">
+                {resultadoCobro.amount_eur.toFixed(2)} €
+              </p>
+              <p className="text-sm text-gray-500 mb-1">
+                {kwhCargados.toFixed(2)} kWh cargados
+              </p>
+              <p className="text-xs text-gray-400 mb-8">
+                {CARGADOR_ACTIVO.nombre}
+              </p>
+              <div className="w-full space-y-2">
+                <button
+                  onClick={() => navigate('/historial')}
+                  className="w-full bg-azul text-white font-bold py-4 rounded-2xl shadow-lg shadow-azul/30"
+                >
+                  Ver en historial
+                </button>
+                <button
+                  onClick={() => navigate('/mapa')}
+                  className="w-full bg-gray-100 text-gray-700 font-semibold py-4 rounded-2xl"
+                >
+                  Buscar otro cargador
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-gray-500 mb-2">
+                {resultadoCobro.error}
+              </p>
+              <p className="text-xs text-gray-400 mb-8">
+                Has cargado {kwhCargados.toFixed(2)} kWh · {coste} €
+              </p>
+              <div className="w-full space-y-2">
+                <button
+                  onClick={detenerCarga}
+                  className="w-full bg-azul text-white font-bold py-4 rounded-2xl"
+                >
+                  Reintentar pago
+                </button>
+                <button
+                  onClick={() => navigate('/mapa')}
+                  className="w-full bg-gray-100 text-gray-700 font-semibold py-4 rounded-2xl"
+                >
+                  Volver al mapa
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      )
+    }
+
+    // Fallback (no debería ocurrir)
     return (
       <div className="h-full flex flex-col items-center justify-center px-6 text-center bg-gray-50">
-        <div className="w-20 h-20 bg-verde/10 rounded-full flex items-center justify-center mb-4">
-          <Zap size={36} className="text-verde" fill="#2D8A4E" />
-        </div>
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Sesión detenida</h2>
-        <p className="text-gray-500 text-sm mb-6">
-          Has cargado {kwhCargados.toFixed(2)} kWh · {coste} €
-        </p>
-        <button
-          onClick={() => navigate('/historial')}
-          className="w-full bg-azul text-white font-bold py-4 rounded-2xl shadow-lg mb-3"
-        >
-          Ver en historial
-        </button>
-        <button
-          onClick={() => navigate('/mapa')}
-          className="w-full bg-gray-100 text-gray-700 font-semibold py-4 rounded-2xl"
-        >
-          Buscar otro cargador
-        </button>
+        <p className="text-gray-500 mb-4">Has cargado {kwhCargados.toFixed(2)} kWh · {coste} €</p>
+        <button onClick={() => navigate('/mapa')} className="text-azul font-medium">Volver al mapa</button>
       </div>
     )
   }

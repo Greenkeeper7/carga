@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
 import BottomNav from './components/BottomNav'
 import MapaPage from './pages/MapaPage'
 import FichaPage from './pages/FichaPage'
@@ -8,6 +9,7 @@ import PerfilPage from './pages/PerfilPage'
 
 export default function App() {
   return (
+    <AuthProvider>
     <BrowserRouter>
       <div className="h-full flex flex-col bg-gray-50 max-w-md mx-auto relative shadow-2xl overflow-hidden">
         <div className="flex-1 overflow-hidden">
@@ -23,5 +25,6 @@ export default function App() {
         <BottomNav />
       </div>
     </BrowserRouter>
+    </AuthProvider>
   )
 }
