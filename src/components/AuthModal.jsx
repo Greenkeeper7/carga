@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { X, Mail, Lock, Zap, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
-export default function AuthModal({ onSuccess, onClose }) {
+export default function AuthModal({ onSuccess, onClose, mensaje }) {
   const { signIn, signUp } = useAuth()
   const [modo, setModo] = useState('login') // 'login' | 'register'
   const [email, setEmail] = useState('')
@@ -74,7 +74,7 @@ export default function AuthModal({ onSuccess, onClose }) {
         {modo === 'login' ? 'Inicia sesión' : 'Crea tu cuenta'}
       </h2>
       <p className="text-sm text-gray-500 text-center mb-5">
-        Necesitas una cuenta para iniciar una carga
+        {mensaje ?? 'Necesitas una cuenta para iniciar una carga'}
       </p>
 
       {/* Toggle */}

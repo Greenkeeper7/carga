@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -16,6 +16,15 @@ import { useCargador } from '../hooks/useCargadores'
 import { useAuth } from '../contexts/AuthContext'
 import AuthModal from '../components/AuthModal'
 import StripeCardForm from '../components/StripeCardForm'
+
+const LS_KEY = 'carga_favoritos'
+
+function getFavoritos() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) ?? '[]') } catch { return [] }
+}
+function setFavoritos(lista) {
+  localStorage.setItem(LS_KEY, JSON.stringify(lista))
+}
 
 const CONECTOR_COLORES = {
   CCS2: '#185FA5',
@@ -68,13 +77,44 @@ export default function FichaPage() {
   const location = useLocation()
   const { user, hasPaymentMethod } = useAuth()
 
-  const [pendiente, setPendiente] = useState(null) // null | 'auth' | 'card'
+  const [pendiente, setPendiente] = useState(null) // null | 'auth' | 'card' | 'login_fav'
+  const [esFavorito, setEsFavorito] = useState(false)
 
   const cargadorDesdeEstado = location.state?.cargador ?? null
   const skipFetch = cargadorDesdeEstado !== null
 
   const { cargador: cargadorSupabase, loading, error } = useCargador(skipFetch ? null : id)
   const cargador = cargadorDesdeEstado ?? cargadorSupabase
+
+  // Sincroniza estado favorito cuando el cargador está disponible
+  useEffect(() => {
+    if (!cargador) return
+    const lista = getFavoritos()
+    setEsFavorito(lista.some(f => f.id === cargador.id))
+  }, [cargador?.id])
+
+  // Toggle favorito
+  const handleFavorito = () => {
+    if (!user) { setPendiente('login_fav'); return }
+    const lista = getFavoritos()
+    const yaGuardado = lista.some(f => f.id === cargador.id)
+    if (yaGuardado) {
+      setFavoritos(lista.filter(f => f.id !== cargador.id))
+      setEsFavorito(false)
+    } else {
+      setFavoritos([...lista, { id: cargador.id, nombre: cargador.nombre, red: cargador.red, direccion: cargador.direccion }])
+      setEsFavorito(true)
+    }
+  }
+
+  // Abrir Google Maps con coordenadas del cargador
+  const handleComoLlegar = () => {
+    const lat = cargador.lat
+    const lng = cargador.lng
+    if (!lat || !lng) return
+    // En móvil abre la app nativa de Maps; en escritorio abre maps.google.com
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank')
+  }
 
   // Guard: comprueba auth y tarjeta antes de iniciar la sesión
   const handleIniciarCarga = () => {
@@ -163,8 +203,15 @@ export default function FichaPage() {
             <ArrowLeft size={18} className="text-gray-700" />
           </button>
           <div className="flex gap-2">
-            <button className="w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center">
-              <Heart size={18} className="text-gray-400" />
+            <button
+              onClick={handleFavorito}
+              className="w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center"
+            >
+              <Heart
+                size={18}
+                fill={esFavorito ? '#C0392B' : 'none'}
+                color={esFavorito ? '#C0392B' : '#9ca3af'}
+              />
             </button>
             <button className="w-10 h-10 bg-white rounded-xl shadow-lg flex items-center justify-center">
               <Share2 size={18} className="text-gray-400" />
@@ -250,7 +297,10 @@ export default function FichaPage() {
 
         {/* Cómo llegar */}
         <div className="px-4 pb-3">
-          <button className="w-full flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+          <button
+            onClick={handleComoLlegar}
+            className="w-full flex items-center justify-between bg-white rounded-2xl p-4 shadow-sm border border-gray-100 active:scale-[0.98] transition-transform"
+          >
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
                 <Navigation size={16} className="text-azul" />
@@ -300,11 +350,28 @@ export default function FichaPage() {
         </button>
       </div>
 
-      {/* Modal de autenticación */}
+      {/* Modal de autenticación (iniciar carga) */}
       {pendiente === 'auth' && (
         <AuthModal
           onSuccess={handleAuthSuccess}
           onClose={() => setPendiente(null)}
+        />
+      )}
+
+      {/* Modal de autenticación (guardar favorito) */}
+      {pendiente === 'login_fav' && (
+        <AuthModal
+          onSuccess={freshUser => {
+            setPendiente(null)
+            // Tras login, guardar el favorito directamente
+            const lista = getFavoritos()
+            if (!lista.some(f => f.id === cargador.id)) {
+              setFavoritos([...lista, { id: cargador.id, nombre: cargador.nombre, red: cargador.red, direccion: cargador.direccion }])
+              setEsFavorito(true)
+            }
+          }}
+          onClose={() => setPendiente(null)}
+          mensaje="Inicia sesión para guardar favoritos"
         />
       )}
 
