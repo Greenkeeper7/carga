@@ -1,4 +1,4 @@
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import {
   ArrowLeft,
   Star,
@@ -60,9 +60,18 @@ function EstrellaRating({ valor }) {
 export default function FichaPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { cargador, loading, error } = useCargador(id)
+  const location = useLocation()
 
-  if (loading) {
+  // Si venimos desde MapaPage el cargador llega en el estado de navegación.
+  // Solo consultamos Supabase cuando no hay datos en el estado (p.ej. acceso directo por URL).
+  const cargadorDesdeEstado = location.state?.cargador ?? null
+  const skipFetch = cargadorDesdeEstado !== null
+
+  const { cargador: cargadorSupabase, loading, error } = useCargador(skipFetch ? null : id)
+
+  const cargador = cargadorDesdeEstado ?? cargadorSupabase
+
+  if (loading && !skipFetch) {
     return (
       <div className="h-full flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-azul border-t-transparent rounded-full animate-spin" />

@@ -75,11 +75,11 @@ export function useCargadores() {
 
 export function useCargador(id) {
   const [cargador, setCargador] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(id !== null)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!id) return
+    if (id === null || id === undefined) return
     let cancelled = false
     setLoading(true)
     fetchCargadorById(id)

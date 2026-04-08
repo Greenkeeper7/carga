@@ -252,7 +252,7 @@ export default function MapaPage() {
               <TarjetaCargador
                 key={c.id}
                 c={c}
-                onClick={() => navigate(`/cargador/${c.id}`)}
+                onClick={() => navigate(`/cargador/${c.id}`, { state: { cargador: c } })}
               />
             ))}
           </div>
@@ -301,7 +301,7 @@ export default function MapaPage() {
                           {c.potencia && <span className="text-xs text-gray-500">{c.potencia} kW</span>}
                         </div>
                         <button
-                          onClick={e => { e.stopPropagation(); navigate(`/cargador/${c.id}`) }}
+                          onClick={e => { e.stopPropagation(); navigate(`/cargador/${c.id}`, { state: { cargador: c } }) }}
                           className="mt-2 w-full bg-azul text-white text-xs font-semibold py-2 rounded-lg"
                         >
                           Ver detalles →
@@ -362,7 +362,7 @@ export default function MapaPage() {
                       )}
                     </div>
                     <button
-                      onClick={() => navigate(`/cargador/${selected.id}`)}
+                      onClick={() => navigate(`/cargador/${selected.id}`, { state: { cargador: selected } })}
                       className="mt-2 w-full text-white text-xs font-bold py-2 px-4 rounded-lg"
                       style={{ backgroundColor: '#185FA5' }}
                     >

@@ -9,7 +9,10 @@
       "Bash(node node_modules/vite/bin/vite.js build)",
       "Bash(curl:*)",
       "Bash(python3 -c \"import sys,json; spec=json.load\\(sys.stdin\\); tbl=spec['definitions'].get\\('Cargadores',{}\\); print\\(json.dumps\\(list\\(tbl.get\\('properties',{}\\).keys\\(\\)\\), indent=2\\)\\)\")",
-      "Bash(node -e \"let d=''; process.stdin.on\\('data',c=>d+=c\\); process.stdin.on\\('end',\\(\\)=>{ const s=JSON.parse\\(d\\); const props=s.definitions?.Cargadores?.properties; console.log\\(Object.keys\\(props||{}\\).join\\('\\\\n'\\)\\); }\\)\")"
+      "Bash(node -e \"let d=''; process.stdin.on\\('data',c=>d+=c\\); process.stdin.on\\('end',\\(\\)=>{ const s=JSON.parse\\(d\\); const props=s.definitions?.Cargadores?.properties; console.log\\(Object.keys\\(props||{}\\).join\\('\\\\n'\\)\\); }\\)\")",
+      "Bash(sed -n '253,257p' C:/Users/green/carga/src/pages/MapaPage.jsx)",
+      "Bash(sed -n '302,306p' C:/Users/green/carga/src/pages/MapaPage.jsx)",
+      "Bash(sed -n '363,367p' C:/Users/green/carga/src/pages/MapaPage.jsx)"
     ]
   }
 }
