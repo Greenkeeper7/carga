@@ -1,31 +1,34 @@
 // Servicio Open Charge Map — https://openchargemap.org/site/develop/api
 const OCM_BASE = 'https://api.openchargemap.io/v3/poi'
 
-// Normaliza los nombres de conector de OCM a los tipos internos de la app
-const CONNECTOR_MAP = {
-  'CCS (Type 2)': 'CCS2',
-  'CCS Type 2': 'CCS2',
-  'Combined Charging System (CCS) Type 2': 'CCS2',
-  'CHAdeMO': 'CHAdeMO',
-  'Type 2 (Socket Only)': 'Type2',
-  'Type 2 (Tethered Connector)': 'Type2',
-  'Type 2 (Mennekes)': 'Type2',
-  'IEC 62196-2 Type 2': 'Type2',
-  'Tesla (Model S/X)': 'Tesla',
-  'Tesla Supercharger': 'Tesla',
-  'Tesla (Roadster)': 'Tesla',
-  'Type 1 (J1772)': 'Type1',
-  'Schuko (CEE7/4)': 'Schuko',
+// Mapa de ConnectionTypeID (modo compact) → nombre normalizado
+// IDs más comunes de OCM España
+const CONNECTOR_ID_MAP = {
+  1: 'Type1',      // Type 1 (J1772)
+  2: 'CHAdeMO',
+  25: 'Type2',     // Type 2 (Socket Only)
+  27: 'Type2',     // Type 2 (Socket Only)
+  28: 'Type2',     // Type 2 (Tethered Connector)
+  33: 'CCS2',      // CCS (Type 2)
+  30: 'Tesla',     // Tesla (Model S/X)
+  32: 'Tesla',     // Tesla Supercharger
+  3: 'Schuko',     // Schuko (CEE7/4)
+  1036: 'Type2',   // Type 2 (Tethered Connector) — ID alternativo
 }
 
-function normalizeConnector(title = '') {
-  if (CONNECTOR_MAP[title]) return CONNECTOR_MAP[title]
-  const t = title.toLowerCase()
-  if (t.includes('ccs')) return 'CCS2'
-  if (t.includes('chademo')) return 'CHAdeMO'
-  if (t.includes('type 2') || t.includes('mennekes')) return 'Type2'
-  if (t.includes('tesla')) return 'Tesla'
-  return title.split('(')[0].trim() || 'Conector'
+// Normaliza el título de conector de OCM, con trim para espacios sobrantes
+function normalizeConnector(title, typeId) {
+  if (!title && typeId && CONNECTOR_ID_MAP[typeId]) return CONNECTOR_ID_MAP[typeId]
+  const t = (title ?? '').trim()
+  if (!t) return typeId && CONNECTOR_ID_MAP[typeId] ? CONNECTOR_ID_MAP[typeId] : 'Conector'
+  const tl = t.toLowerCase()
+  if (tl.includes('ccs') || tl.includes('combo')) return 'CCS2'
+  if (tl.includes('chademo')) return 'CHAdeMO'
+  if (tl.includes('type 2') || tl.includes('mennekes')) return 'Type2'
+  if (tl.includes('tesla')) return 'Tesla'
+  if (tl.includes('type 1') || tl.includes('j1772')) return 'Type1'
+  if (tl.includes('schuko')) return 'Schuko'
+  return t.split('(')[0].trim() || 'Conector'
 }
 
 // Convierte un POI de OCM al formato interno de la app
@@ -46,7 +49,7 @@ export function mapOCMPoi(poi) {
 
   const conectores = conns.flatMap(c =>
     Array.from({ length: Math.max(1, c.Quantity ?? 1) }, () => ({
-      tipo: normalizeConnector(c.ConnectionType?.Title),
+      tipo: normalizeConnector(c.ConnectionType?.Title, c.ConnectionTypeID),
       kw: c.PowerKW ?? null,
       disponible: c.StatusType?.IsOperational !== false,
     }))
@@ -86,7 +89,6 @@ export async function fetchCargadoresOCM({
     output: 'json',
     countrycode: 'ES',
     maxresults: String(maxResults),
-    compact: 'true',
     verbose: 'false',
     latitude: String(lat),
     longitude: String(lng),
