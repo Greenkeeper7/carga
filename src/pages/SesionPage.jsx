@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { Zap, MapPin, Clock, Euro, AlertTriangle, CheckCircle, XCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { getStripe } from '../lib/stripe'
 
 const CARGADOR_FALLBACK = {
   nombre: 'Punto de carga',
@@ -150,24 +151,27 @@ export default function SesionPage() {
       const { data: { session } } = await supabase.auth.getSession()
       const pmId = session?.user?.user_metadata?.stripe_pm_id
       const importeEur = parseFloat((kwhCargados * CARGADOR_ACTIVO.precio).toFixed(2))
+      const amountCents = Math.round(importeEur * 100)
 
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-charge`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({
-            payment_method_id: pmId,
-            amount_eur: importeEur,
-            description: `Carga en ${CARGADOR_ACTIVO.nombre} — ${kwhCargados.toFixed(2)} kWh`,
-          }),
-        }
-      )
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Error al procesar el pago')
+      // 1. Pedir el client_secret al servidor (la secret key nunca sale del servidor)
+      const res = await fetch('/api/create-payment-intent', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount_cents: amountCents,
+          description: `Carga en ${CARGADOR_ACTIVO.nombre} — ${kwhCargados.toFixed(2)} kWh`,
+        }),
+      })
+      const { client_secret, error: serverError } = await res.json()
+      if (!res.ok) throw new Error(serverError ?? 'Error al crear el pago')
+
+      // 2. Confirmar el pago con la tarjeta guardada (Stripe.js en el navegador)
+      const stripe = await getStripe()
+      const { error: stripeError } = await stripe.confirmCardPayment(client_secret, {
+        payment_method: pmId,
+      })
+      if (stripeError) throw new Error(stripeError.message)
+
       setResultadoCobro({ ok: true, amount_eur: importeEur })
     } catch (e) {
       setResultadoCobro({ ok: false, error: e.message })
