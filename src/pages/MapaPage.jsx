@@ -92,11 +92,17 @@ export default function MapaPage() {
     libraries: ['places'],
   })
 
-  // Redes disponibles derivadas de los datos reales (top 7 por frecuencia)
+  const PALABRAS_EXCLUIDAS = ['business', 'unknown', 'private', 'individual']
+
+  // Redes disponibles derivadas de los datos reales (top 7 por frecuencia, solo operadores reales)
   const redes = useMemo(() => {
     const counts = {}
     cargadores.forEach(c => {
-      if (c.red && c.red !== 'Desconocido') counts[c.red] = (counts[c.red] ?? 0) + 1
+      if (!c.red || c.red === 'Desconocido') return
+      const lower = c.red.toLowerCase()
+      if (PALABRAS_EXCLUIDAS.some(p => lower.includes(p))) return
+      if (c.red.length > 25) return
+      counts[c.red] = (counts[c.red] ?? 0) + 1
     })
     return Object.entries(counts)
       .sort((a, b) => b[1] - a[1])
@@ -155,9 +161,9 @@ export default function MapaPage() {
     setMostrarBuscarZona(false)
   }, [buscarEnZona])
 
-  // Centro inicial del mapa
-  const centroInicial = userLocation ?? CENTER_ESPANA
-  const zoomInicial = userLocation ? 13 : 6
+  // Centro inicial del mapa — zoom 6 muestra España entera; si hay ubicación del usuario zoom 13
+  const centroInicial = CENTER_ESPANA
+  const zoomInicial = 6
 
   return (
     <div className="h-full flex flex-col">
@@ -166,7 +172,7 @@ export default function MapaPage() {
         <div className="flex items-center justify-between mb-1.5">
           <div className="flex items-center gap-1.5">
             {/* Logo SVG: C blanca + rayo amarillo sobre fondo azul */}
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="32" height="32" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="28" height="28" rx="7" fill="#185FA5"/>
               <path d="M18 7C15.8 5.9 13.2 6.1 11.2 7.4C9.2 8.7 8 11 8 13.4C8 15.8 9.2 18.1 11.2 19.4C13.2 20.7 15.8 20.9 18 19.8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
               <path d="M16.5 6.5L12.5 14h4l-2.5 7.5L22 13h-5.5l3-6.5z" fill="#E8B84B"/>
