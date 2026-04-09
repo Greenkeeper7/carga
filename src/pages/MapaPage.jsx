@@ -177,9 +177,12 @@ export default function MapaPage() {
               <path d="M18 7C15.8 5.9 13.2 6.1 11.2 7.4C9.2 8.7 8 11 8 13.4C8 15.8 9.2 18.1 11.2 19.4C13.2 20.7 15.8 20.9 18 19.8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
               <path d="M16.5 6.5L12.5 14h4l-2.5 7.5L22 13h-5.5l3-6.5z" fill="#E8B84B"/>
             </svg>
-            <h1 className="text-lg font-bold leading-none">
-              <span style={{ color: '#185FA5' }}>Carg</span><span style={{ color: '#E8B84B' }}>App</span>
-            </h1>
+            <div className="flex flex-col justify-center">
+              <h1 className="text-lg font-bold leading-none">
+                <span style={{ color: '#185FA5' }}>Carg</span><span style={{ color: '#E8B84B' }}>App</span>
+              </h1>
+              <p className="text-[9px] font-medium tracking-[0.2em] leading-none mt-0.5" style={{ color: '#888780' }}>ELECTRIC</p>
+            </div>
             {loading && (
               <div className="w-3.5 h-3.5 border-2 border-azul border-t-transparent rounded-full animate-spin" />
             )}
