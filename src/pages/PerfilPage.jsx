@@ -149,7 +149,7 @@ function ModalPremium({ onClose }) {
             <Sparkles size={22} color="white" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-gray-900">Carga Premium</h2>
+            <h2 className="text-lg font-bold text-gray-900">CargApp Premium</h2>
             <p className="text-sm text-gray-500">Solo <span className="font-bold text-azul">4,99 €/mes</span></p>
           </div>
         </div>
@@ -306,7 +306,7 @@ export default function PerfilPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <Sparkles size={15} className="text-azul" />
-                    <p className="font-bold text-gray-900 text-sm">Carga Premium</p>
+                    <p className="font-bold text-gray-900 text-sm">CargApp Premium</p>
                   </div>
                   <span className="text-sm font-bold text-azul">4,99 €/mes</span>
                 </div>
@@ -394,7 +394,7 @@ export default function PerfilPage() {
           </Seccion>
 
           <p className="text-center text-[11px] text-gray-300 py-3">
-            Carga v0.1.0 · Hecho con ⚡ en España
+            CargApp v0.1.0 · Hecho con ⚡ en España
           </p>
         </div>
       </div>

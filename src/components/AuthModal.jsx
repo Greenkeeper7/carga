@@ -67,7 +67,9 @@ export default function AuthModal({ onSuccess, onClose, mensaje }) {
         <div className="w-9 h-9 bg-azul rounded-xl flex items-center justify-center shadow-lg shadow-azul/30">
           <Zap size={18} color="white" fill="white" />
         </div>
-        <span className="text-xl font-bold text-gray-900">Carga</span>
+        <span className="text-xl font-bold">
+          <span style={{ color: '#185FA5' }}>Carg</span><span style={{ color: '#E8B84B' }}>App</span>
+        </span>
       </div>
 
       <h2 className="text-lg font-bold text-gray-900 text-center mb-1">

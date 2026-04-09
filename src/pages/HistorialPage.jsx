@@ -173,7 +173,7 @@ function generarFactura(s) {
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Factura ${s.id.toUpperCase()} — Carga</title>
+  <title>Factura ${s.id.toUpperCase()} — CargApp</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; color: #111; padding: 48px; font-size: 13px; }
@@ -201,7 +201,7 @@ function generarFactura(s) {
 <body>
   <div class="logo">
     <div class="logo-icon">⚡</div>
-    <span class="logo-text">Carga</span>
+    <span class="logo-text">CargApp</span>
   </div>
 
   <h2>Factura de recarga</h2>
@@ -264,7 +264,7 @@ function generarFactura(s) {
   </table>
 
   <div class="footer">
-    Carga App · CIF B-00000000 · soporte@carga.app<br/>
+    CargApp · CIF B-00000000 · soporte@cargapp.es<br/>
     Este documento tiene validez como factura simplificada según el art. 4 RD 1619/2012
   </div>
 </body>

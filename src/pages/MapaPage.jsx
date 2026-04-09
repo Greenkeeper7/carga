@@ -168,7 +168,9 @@ export default function MapaPage() {
             <div className="w-8 h-8 bg-azul rounded-lg flex items-center justify-center">
               <Zap size={16} color="white" fill="white" />
             </div>
-            <h1 className="text-xl font-bold text-gray-900">Carga</h1>
+            <h1 className="text-xl font-bold">
+              <span style={{ color: '#185FA5' }}>Carg</span><span style={{ color: '#E8B84B' }}>App</span>
+            </h1>
             {loading && (
               <div className="w-4 h-4 border-2 border-azul border-t-transparent rounded-full animate-spin ml-1" />
             )}
