@@ -162,22 +162,25 @@ export default function MapaPage() {
   return (
     <div className="h-full flex flex-col">
       {/* ── Header ── */}
-      <div className="bg-white px-4 pt-12 pb-3 z-10 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-azul rounded-lg flex items-center justify-center">
-              <Zap size={16} color="white" fill="white" />
-            </div>
-            <h1 className="text-xl font-bold">
+      <div className="bg-white px-4 pt-10 pb-1.5 z-10 shadow-sm">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-1.5">
+            {/* Logo SVG: C blanca + rayo amarillo sobre fondo azul */}
+            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="28" height="28" rx="7" fill="#185FA5"/>
+              <path d="M18 7C15.8 5.9 13.2 6.1 11.2 7.4C9.2 8.7 8 11 8 13.4C8 15.8 9.2 18.1 11.2 19.4C13.2 20.7 15.8 20.9 18 19.8" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
+              <path d="M16.5 6.5L12.5 14h4l-2.5 7.5L22 13h-5.5l3-6.5z" fill="#E8B84B"/>
+            </svg>
+            <h1 className="text-lg font-bold leading-none">
               <span style={{ color: '#185FA5' }}>Carg</span><span style={{ color: '#E8B84B' }}>App</span>
             </h1>
             {loading && (
-              <div className="w-4 h-4 border-2 border-azul border-t-transparent rounded-full animate-spin ml-1" />
+              <div className="w-3.5 h-3.5 border-2 border-azul border-t-transparent rounded-full animate-spin" />
             )}
           </div>
           <button
             onClick={() => setVistaLista(v => !v)}
-            className="text-xs font-medium text-azul bg-blue-50 px-3 py-1.5 rounded-lg"
+            className="text-xs font-medium text-azul bg-blue-50 px-2.5 py-1 rounded-lg"
           >
             {vistaLista ? 'Ver mapa' : 'Ver lista'}
           </button>
@@ -185,21 +188,21 @@ export default function MapaPage() {
 
         {/* Buscador */}
         <div className="relative">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
             placeholder="Buscar cargador o dirección..."
             value={busqueda}
             onChange={e => setBusqueda(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 bg-gray-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-azul/30"
+            className="w-full pl-8 pr-3 py-1.5 bg-gray-100 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-azul/30"
           />
         </div>
 
         {/* Filtros */}
-        <div className="flex gap-2 mt-2 overflow-x-auto no-scrollbar pb-1">
+        <div className="flex gap-1.5 mt-1.5 overflow-x-auto no-scrollbar pb-0.5">
           <button
             onClick={() => setSoloDisponibles(v => !v)}
-            className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+            className={`flex-shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-colors ${
               soloDisponibles ? 'bg-verde text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
@@ -207,7 +210,7 @@ export default function MapaPage() {
           </button>
           <button
             onClick={() => setFiltroRed('todas')}
-            className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+            className={`flex-shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-colors ${
               filtroRed === 'todas' ? 'bg-azul text-white' : 'bg-gray-100 text-gray-600'
             }`}
           >
@@ -217,7 +220,7 @@ export default function MapaPage() {
             <button
               key={red}
               onClick={() => setFiltroRed(red)}
-              className={`flex-shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+              className={`flex-shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-colors ${
                 filtroRed === red ? 'bg-azul text-white' : 'bg-gray-100 text-gray-600'
               }`}
             >
