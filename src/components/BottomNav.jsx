@@ -1,8 +1,9 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { MapPin, Clock, User, Zap } from 'lucide-react'
+import { MapPin, Clock, User, Zap, Navigation } from 'lucide-react'
 
 const tabs = [
   { to: '/mapa', icon: MapPin, label: 'Mapa' },
+  { to: '/ruta', icon: Navigation, label: 'Ruta' },
   { to: '/historial', icon: Clock, label: 'Historial' },
   { to: '/perfil', icon: User, label: 'Perfil' },
 ]

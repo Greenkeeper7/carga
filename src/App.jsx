@@ -6,6 +6,7 @@ import FichaPage from './pages/FichaPage'
 import SesionPage from './pages/SesionPage'
 import HistorialPage from './pages/HistorialPage'
 import PerfilPage from './pages/PerfilPage'
+import RutaPage from './pages/RutaPage'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Navigate to="/mapa" replace />} />
             <Route path="/mapa" element={<MapaPage />} />
+            <Route path="/ruta" element={<RutaPage />} />
             <Route path="/cargador/:id" element={<FichaPage />} />
             <Route path="/sesion" element={<SesionPage />} />
             <Route path="/historial" element={<HistorialPage />} />
