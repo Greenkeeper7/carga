@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { X, Mail, Lock, Zap, AlertCircle, CheckCircle } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
@@ -7,6 +8,7 @@ export default function AuthModal({ onSuccess, onClose, mensaje }) {
   const [modo, setModo] = useState('login') // 'login' | 'register'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [aceptaLegal, setAceptaLegal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [confirmacion, setConfirmacion] = useState(false)
@@ -14,6 +16,12 @@ export default function AuthModal({ onSuccess, onClose, mensaje }) {
   const handleSubmit = async e => {
     e.preventDefault()
     setError(null)
+
+    if (modo === 'register' && !aceptaLegal) {
+      setError('Debes aceptar la Política de Privacidad y los Términos de Uso para registrarte.')
+      return
+    }
+
     setLoading(true)
 
     const { data, error: authError } =
@@ -122,6 +130,28 @@ export default function AuthModal({ onSuccess, onClose, mensaje }) {
           />
         </div>
 
+        {/* Aceptación legal — solo en registro */}
+        {modo === 'register' && (
+          <label className="flex items-start gap-2.5 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={aceptaLegal}
+              onChange={e => setAceptaLegal(e.target.checked)}
+              className="mt-0.5 w-4 h-4 accent-azul flex-shrink-0"
+            />
+            <span className="text-xs text-gray-500 leading-relaxed">
+              He leído y acepto la{' '}
+              <Link
+                to="/legal"
+                onClick={onClose}
+                className="text-azul font-medium underline"
+              >
+                Política de Privacidad y los Términos de Uso
+              </Link>
+            </span>
+          </label>
+        )}
+
         {/* Error */}
         {error && (
           <div className="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl p-3">
@@ -146,12 +176,14 @@ export default function AuthModal({ onSuccess, onClose, mensaje }) {
         </button>
       </form>
 
-      <p className="text-center text-xs text-gray-400 mt-4">
-        Al continuar aceptas los{' '}
-        <span className="text-azul font-medium">Términos de servicio</span>
-        {' '}y la{' '}
-        <span className="text-azul font-medium">Política de privacidad</span>
-      </p>
+      {modo === 'login' && (
+        <p className="text-center text-xs text-gray-400 mt-6">
+          Al continuar aceptas los{' '}
+          <Link to="/legal" onClick={onClose} className="text-azul font-medium">Términos de Uso</Link>
+          {' '}y la{' '}
+          <Link to="/legal" onClick={onClose} className="text-azul font-medium">Política de Privacidad</Link>
+        </p>
+      )}
     </Backdrop>
   )
 }
@@ -163,7 +195,7 @@ function Backdrop({ children, onClose }) {
       onClick={onClose}
     >
       <div
-        className="bg-white w-full max-w-md rounded-t-3xl px-5 pt-5 pb-10 shadow-2xl"
+        className="bg-white w-full max-w-md rounded-t-3xl px-5 pt-5 pb-10 shadow-2xl max-h-[90vh] overflow-y-auto"
         onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-end mb-2">

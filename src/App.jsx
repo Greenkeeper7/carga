@@ -7,6 +7,7 @@ import SesionPage from './pages/SesionPage'
 import HistorialPage from './pages/HistorialPage'
 import PerfilPage from './pages/PerfilPage'
 import RutaPage from './pages/RutaPage'
+import LegalPage from './pages/LegalPage'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
             <Route path="/sesion" element={<SesionPage />} />
             <Route path="/historial" element={<HistorialPage />} />
             <Route path="/perfil" element={<PerfilPage />} />
+            <Route path="/legal" element={<LegalPage />} />
           </Routes>
         </div>
         <BottomNav />
