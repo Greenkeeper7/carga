@@ -337,6 +337,7 @@ export default function FichaPage() {
           right: 0,
           padding: '0 16px',
           zIndex: 999,
+          display: (pendiente === 'auth' || pendiente === 'login_fav') ? 'none' : undefined,
         }}
       >
         <button
