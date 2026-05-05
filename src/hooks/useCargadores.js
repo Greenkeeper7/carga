@@ -1,25 +1,16 @@
 import { useState, useEffect } from 'react'
 
-const BASE_URL = 'https://bhfjondoxtbxtuccfbth.supabase.co/rest/v1/Cargadores'
-const API_KEY = import.meta.env.VITE_SUPABASE_SERVICE_KEY
-
-const HEADERS = {
-  apikey: API_KEY,
-  Authorization: `Bearer ${API_KEY}`,
-  'Content-Type': 'application/json',
-}
-
 async function fetchCargadores() {
-  const res = await fetch(`${BASE_URL}?select=*`, { headers: HEADERS })
+  const res = await fetch('/api/cargadores')
   if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`)
   return res.json()
 }
 
 async function fetchCargadorById(id) {
-  const res = await fetch(`${BASE_URL}?id=eq.${id}&select=*`, { headers: HEADERS })
+  const res = await fetch(`/api/cargador/${id}`)
+  if (res.status === 404) return null
   if (!res.ok) throw new Error(`Error ${res.status}: ${await res.text()}`)
-  const data = await res.json()
-  return data[0] ?? null
+  return res.json()
 }
 
 function mapRow(row) {
