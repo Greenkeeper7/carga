@@ -150,6 +150,7 @@ export default function SesionPage() {
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
+      if (!session) throw new Error('Sesión expirada. Vuelve a iniciar sesión.')
       const pmId = session?.user?.user_metadata?.stripe_pm_id
       const importeEur = parseFloat((kwhCargados * CARGADOR_ACTIVO.precio).toFixed(2))
       const amountCents = Math.round(importeEur * 100)
@@ -157,7 +158,10 @@ export default function SesionPage() {
       // 1. Pedir el client_secret al servidor (la secret key nunca sale del servidor)
       const res = await fetch('/api/create-payment-intent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
           amount_cents: amountCents,
           description: `Carga en ${CARGADOR_ACTIVO.nombre} — ${kwhCargados.toFixed(2)} kWh`,

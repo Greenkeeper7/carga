@@ -1,17 +1,17 @@
-// Vercel Serverless Function — crea un PaymentIntent en Stripe
-// La secret key vive solo aquí, en el servidor. Añádela en Vercel:
-//   Dashboard → Settings → Environment Variables → STRIPE_SECRET_KEY
 import Stripe from 'stripe'
+import { requireAuth } from './_auth.js'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
 export default async function handler(req, res) {
-  // CORS para desarrollo local
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Headers', 'content-type')
+  res.setHeader('Access-Control-Allow-Headers', 'content-type, authorization')
 
   if (req.method === 'OPTIONS') return res.status(200).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+
+  const user = await requireAuth(req, res)
+  if (!user) return
 
   try {
     const { amount_cents, description } = req.body
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
       currency: 'eur',
       description: description ?? 'Sesión de carga — Carga App',
       automatic_payment_methods: { enabled: true },
+      metadata: { user_id: user.id },
     })
 
     return res.status(200).json({
